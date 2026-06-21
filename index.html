@@ -157,18 +157,37 @@
       text-transform: uppercase;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.6rem;
+      position: relative;
+      padding: 0.25rem 0;
     }
-    .nav_logo .logo-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
+    .nav_logo::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 70%);
+      opacity: 0.3;
+    }
+    /* Mini EQ bars as logo mark */
+    .logo-mark {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 14px;
+    }
+    .logo-mark span {
+      width: 2.5px;
       background: var(--accent);
-      display: inline-block;
-      animation: pulseDot 2s ease infinite;
+      border-radius: 1px 1px 0 0;
+      animation: logoEq 1.6s ease infinite;
     }
-    @keyframes pulseDot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.6); }
+    .logo-mark span:nth-child(1) { height: 8px; animation-delay: 0.0s; }
+    .logo-mark span:nth-child(2) { height: 14px; animation-delay: 0.2s; }
+    .logo-mark span:nth-child(3) { height: 6px; animation-delay: 0.4s; }
+    @keyframes logoEq {
+      0%, 100% { transform: scaleY(0.6); opacity: 0.6; }
+      50% { transform: scaleY(1); opacity: 1; }
     }
     .nav_links {
       display: flex;
@@ -1138,7 +1157,7 @@
   <nav class="navbar_wrap" id="navbar">
     <div class="navbar_inner">
       <a href="#" class="nav_logo">
-        <span class="logo-dot"></span>
+        <span class="logo-mark"><span></span><span></span><span></span></span>
         SOLO EL MUSIC
       </a>
       <div class="nav_links" id="navLinks">
