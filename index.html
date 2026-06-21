@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solo el Music — Producción Musical & Sound Design</title>
+  <meta name="description" content="Estudio de producción musical, beats personalizados, mezcla y mastering. Tutoriales de alta calidad en español." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.plyr.io/3.7.8/plyr.css" rel="stylesheet" />
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { background: #1D1D1B; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #1D1D1B;
+      color: #efefeb;
+      overflow-x: hidden;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    ul { list-style: none; }
+
+    /* ===== CUSTOM PROPERTIES ===== */
+    :root {
+      --black: #1D1D1B;
+      --white: #efefeb;
+      --gray: #888;
+      --accent: #9b87f5;
+      --accent-dim: rgba(155, 135, 245, 0.15);
+      --radius: 12px;
+      --ease: cubic-bezier(0.19, 1, 0.22, 1);
+    }
+
+    /* ===== MASK UTILITY (Sonar style) ===== */
+    .mask {
+      -webkit-mask-image: -webkit-radial-gradient(white, black);
+      mask-image: radial-gradient(white, black);
+    }
+
+    /* ===== LOADING OVERLAY ===== */
+    .loader {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: #1D1D1B;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 2rem;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+    .loader.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .load-lines {
+      display: flex;
+      gap: 4px;
+      pointer-events: none;
+    }
+    .load-lines .line {
+      width: 2px;
+      height: 40px;
+      background: var(--white);
+      border-radius: 1px;
+      opacity: 0.15;
+      animation: loadPulse 1.2s ease infinite;
+    }
+    .load-lines .line:nth-child(1) { animation-delay: 0.0s; height: 20px; }
+    .load-lines .line:nth-child(2) { animation-delay: 0.1s; height: 35px; }
+    .load-lines .line:nth-child(3) { animation-delay: 0.2s; height: 50px; }
+    .load-lines .line:nth-child(4) { animation-delay: 0.3s; height: 40px; }
+    .load-lines .line:nth-child(5) { animation-delay: 0.4s; height: 55px; }
+    .load-lines .line:nth-child(6) { animation-delay: 0.5s; height: 30px; }
+    .load-lines .line:nth-child(7) { animation-delay: 0.6s; height: 45px; }
+    .load-lines .line:nth-child(8) { animation-delay: 0.7s; height: 25px; }
+    .load-lines .line:nth-child(9) { animation-delay: 0.8s; height: 50px; }
+    .load-lines .line:nth-child(10) { animation-delay: 0.9s; height: 35px; }
+
+    @keyframes loadPulse {
+      0%, 100% { opacity: 0.15; transform: scaleY(0.6); }
+      50% { opacity: 0.8; transform: scaleY(1); }
+    }
+
+    .loader-label {
+      font-size: 0.7rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gray);
+      font-weight: 300;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #1D1D1B; }
+    ::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
+
+    /* ===== SMOOTH SCROLL (Lenis) ===== */
+    html.lenis { scroll-behavior: auto; }
+    html.lenis-smooth { scroll-behavior: auto; }
+    html.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+    .lenis-smooth { scroll-behavior: auto; }
+
+    /* ===== NAVBAR ===== */
+    .navbar_wrap {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 1.25rem 2rem;
+      transition: all 0.4s var(--ease);
+      pointer-events: none;
+    }
+    .navbar_wrap > * { pointer-events: auto; }
+    .navbar_wrap.scrolled {
+      background: rgba(29, 29, 27, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 0.75rem 2rem;
+    }
+    .navbar_inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(239, 239, 235, 0.1);
+      padding-bottom: 1rem;
+      transition: all 0.4s var(--ease);
+    }
+    .navbar_wrap.scrolled .navbar_inner {
+      border-bottom-color: transparent;
+      padding-bottom: 0;
+    }
+    .nav_logo {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .nav_logo .logo-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+      animation: pulseDot 2s ease infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.6); }
+    }
+    .nav_links {
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+    }
+    .nav_links a {
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(239, 239, 235, 0.5);
+      transition: color 0.3s ease;
+      position: relative;
+    }
+    .nav_links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--white);
+      transition: width 0.4s var(--ease);
+    }
+    .nav_links a:hover { color: var(--white); }
+    .nav_links a:hover::after { width: 100%; }
+
+    .nav_cta {
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid rgba(239, 239, 235, 0.2);
+      border-radius: 50px;
+      transition: all 0.3s ease;
+      color: var(--white);
+    }
+    .nav_cta:hover {
+      background: var(--white);
+      color: var(--black);
+      border-color: var(--white);
+    }
+
+    .nav_toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+    .nav_toggle span {
+      width: 22px; height: 1.5px;
+      background: var(--white);
+      transition: all 0.3s ease;
+      border-radius: 1px;
+    }
+    .nav_toggle.active span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+    .nav_toggle.active span:nth-child(2) { opacity: 0; }
+    .nav_toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 8rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero_bg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background:
+        radial-gradient(ellipse at 30% 20%, rgba(155,135,245,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 80%, rgba(155,135,245,0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .hero_content {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+    }
+    .hero_label {
+      font-size: 0.75rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 1rem;
+      font-weight: 300;
+    }
+    .hero h1 {
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 .slant {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--gray);
+      display: inline;
+    }
+    .hero_desc {
+      font-size: 1.05rem;
+      color: rgba(239, 239, 235, 0.6);
+      max-width: 550px;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+    .hero_actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: all 0.4s var(--ease);
+    }
+    .btn-primary {
+      background: var(--white);
+      color: var(--black);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(239, 239, 235, 0.15);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--white);
+      border: 1px solid rgba(239, 239, 235, 0.2);
+    }
+    .btn-outline:hover {
+      background: rgba(239, 239, 235, 0.05);
+      border-color: var(--white);
+      transform: translateY(-2px);
+    }
+    .hero_stats {
+      display: flex;
+      gap: 3rem;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(239, 239, 235, 0.06);
+    }
+    .hero_stat .number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+    .hero_stat .label {
+      font-size: 0.7rem;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 0.2rem;
+    }
+
+    /* ===== THREE-COLUMN GRID (like Sonar) ===== */
+    .three-col {
+      padding: 4rem 2rem;
+    }
+    .three-col_head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 2rem;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .three-col_head h2 {
+      font-size: 1.4rem;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+    }
+    .three-col_head .eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gray);
+    }
+    .three-col_list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .three-col_item {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      aspect-ratio: 16/10;
+      background: #2a2a28;
+      transition: all 0.5s var(--ease);
+    }
+    .three-col_item .thumb-bg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.8s var(--ease);
+    }
+    .three-col_item:hover .thumb-bg {
+      transform: scale(1.05);
+    }
+    .three-col_item .overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 2rem 1.5rem;
+      background: linear-gradient(transparent, rgba(0,0,0,0.8));
+      transition: all 0.4s var(--ease);
+    }
+    .three-col_item .overlay .cat {
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.3rem;
+    }
+    .three-col_item .overlay h3 {
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+    .three-col_item .play-badge {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+      background: rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+    }
+    .three-col_item:hover .play-badge {
+      background: var(--white);
+      border-color: var(--white);
+    }
+    .three-col_item:hover .play-badge svg { fill: var(--black); }
+    .play-badge svg {
+      width: 12px; height: 12px;
+      fill: var(--white);
+      margin-left: 1px;
+      transition: fill 0.3s ease;
+    }
+
+    /* ===== SOUND LINE SECTION ===== */
+    .sound-section {
+      padding: 6rem 2rem;
+      background: #1a1a18;
+      overflow: hidden;
+    }
+    .sound-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .sound-lines {
+      display: flex;
+      align-items: center;
+      gap: 0.5vw;
+      height: 80px;
+      margin-top: 2rem;
+    }
+    .sound-line {
+      height: 100%;
+      background: var(--white);
+      border-radius: 2px;
+      opacity: 0.08;
+      transform-origin: bottom;
+      animation: soundWave 1.8s ease infinite;
+    }
+    .sound-line:nth-child(1) { width: 5vw; animation-delay: 0.0s; height: 40%; }
+    .sound-line:nth-child(2) { width: 8vw; animation-delay: 0.15s; height: 65%; }
+    .sound-line:nth-child(3) { width: 14vw; animation-delay: 0.3s; height: 90%; }
+    .sound-line:nth-child(4) { width: 6vw; animation-delay: 0.45s; height: 35%; }
+    .sound-line:nth-child(5) { width: 9vw; animation-delay: 0.6s; height: 70%; }
+    .sound-line:nth-child(6) { width: 12vw; animation-delay: 0.75s; height: 55%; }
+    .sound-line:nth-child(7) { width: 7vw; animation-delay: 0.9s; height: 45%; }
+    .sound-line:nth-child(8) { width: 10vw; animation-delay: 1.05s; height: 80%; }
+    .sound-line:nth-child(9) { width: 4vw; animation-delay: 1.2s; height: 30%; }
+    .sound-line:nth-child(10) { width: 11vw; animation-delay: 1.35s; height: 60%; }
+    .sound-line:nth-child(11) { width: 6vw; animation-delay: 1.5s; height: 50%; }
+    .sound-line:nth-child(12) { width: 9vw; animation-delay: 1.65s; height: 75%; }
+
+    @keyframes soundWave {
+      0%, 100% { transform: scaleY(0.6); opacity: 0.06; }
+      50% { transform: scaleY(1); opacity: 0.15; }
+    }
+
+    .sound-text {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      margin-top: 3rem;
+    }
+    .sound-text h2 {
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 600;
+      letter-spacing: -1px;
+      line-height: 1.2;
+    }
+    .sound-text h2 .slant {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--gray);
+    }
+    .sound-text p {
+      color: rgba(239, 239, 235, 0.5);
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+
+    /* ===== SECTION COMMON ===== */
+    .section {
+      padding: 6rem 2rem;
+      position: relative;
+    }
+    .section .label {
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 1rem;
+      font-weight: 300;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 3.5vw, 3.2rem);
+      font-weight: 600;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .section-title .slant {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--gray);
+    }
+    .section-sub {
+      color: rgba(239, 239, 235, 0.5);
+      max-width: 500px;
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    /* ===== SERVICES GRID ===== */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      max-width: 1400px;
+      margin: 3rem auto 0;
+      background: rgba(239, 239, 235, 0.04);
+      border: 1px solid rgba(239, 239, 235, 0.04);
+    }
+    .service-item {
+      padding: 2.5rem 2rem;
+      background: #1D1D1B;
+      transition: all 0.4s var(--ease);
+      position: relative;
+    }
+    .service-item:hover {
+      background: #222220;
+    }
+    .service-item .icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .service-item h3 {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.3px;
+    }
+    .service-item p {
+      font-size: 0.85rem;
+      color: rgba(239, 239, 235, 0.45);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    .service-item .price {
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .service-item .dashes {
+      position: absolute;
+      bottom: 0; left: 1rem; right: 1rem;
+      height: 1px;
+      background: repeating-linear-gradient(
+        to right,
+        rgba(239, 239, 235, 0.1) 0px,
+        rgba(239, 239, 235, 0.1) 4px,
+        transparent 4px,
+        transparent 8px
+      );
+    }
+    .service-item .dashes-v {
+      position: absolute;
+      top: 0; bottom: 0; right: 0;
+      width: 1px;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(239, 239, 235, 0.1) 0px,
+        rgba(239, 239, 235, 0.1) 4px,
+        transparent 4px,
+        transparent 8px
+      );
+    }
+
+    /* ===== YOUTUBE GRID ===== */
+    .yt-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      max-width: 1400px;
+      margin: 3rem auto 0;
+      background: rgba(239, 239, 235, 0.04);
+      border: 1px solid rgba(239, 239, 235, 0.04);
+    }
+    .yt-card {
+      background: #1D1D1B;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.4s var(--ease);
+      position: relative;
+    }
+    .yt-card:hover {
+      background: #222220;
+    }
+    .yt-card .thumb {
+      width: 100%;
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .yt-card .thumb .grad-bg {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      transition: transform 0.6s var(--ease);
+    }
+    .yt-card:hover .thumb .grad-bg {
+      transform: scale(1.05);
+    }
+    .yt-card .thumb .play-circle {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(8px);
+      background: rgba(0,0,0,0.2);
+    }
+    .yt-card:hover .play-circle {
+      background: var(--white);
+      border-color: var(--white);
+    }
+    .yt-card:hover .play-circle svg { fill: var(--black); }
+    .play-circle svg {
+      width: 16px; height: 16px;
+      fill: var(--white);
+      margin-left: 2px;
+      transition: fill 0.3s ease;
+    }
+    .yt-card .info {
+      padding: 1.25rem;
+    }
+    .yt-card .info h4 {
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 0.3rem;
+      line-height: 1.4;
+    }
+    .yt-card .info .meta {
+      font-size: 0.75rem;
+      color: var(--gray);
+    }
+    .yt-cta {
+      text-align: center;
+      margin-top: 3rem;
+    }
+
+    /* ===== MARQUEE ===== */
+    .marquee-section {
+      padding: 4rem 0;
+      overflow: hidden;
+      background: #1a1a18;
+    }
+    .marquee-track {
+      display: flex;
+      gap: 2rem;
+      white-space: nowrap;
+      animation: marqueeScroll 30s linear infinite;
+    }
+    .marquee-track:hover { animation-play-state: paused; }
+    .marquee-track span {
+      font-size: clamp(4rem, 10vw, 8rem);
+      font-weight: 700;
+      letter-spacing: -4px;
+      color: rgba(239, 239, 235, 0.04);
+      transition: color 0.4s ease;
+      user-select: none;
+    }
+    .marquee-track:hover span {
+      color: rgba(239, 239, 235, 0.08);
+    }
+    .marquee-track .highlight {
+      color: rgba(155, 135, 245, 0.08);
+    }
+    .marquee-track:hover .highlight {
+      color: rgba(155, 135, 245, 0.15);
+    }
+
+    @keyframes marqueeScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ===== STATS ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      max-width: 1400px;
+      margin: 0 auto;
+      border: 1px solid rgba(239, 239, 235, 0.04);
+      background: rgba(239, 239, 235, 0.02);
+    }
+    .stat-item {
+      padding: 3rem 2rem;
+      text-align: center;
+      border-right: 1px solid rgba(239, 239, 235, 0.04);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-item .num {
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: -2px;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .stat-item .desc {
+      font-size: 0.8rem;
+      color: var(--gray);
+      line-height: 1.5;
+      max-width: 200px;
+      margin: 0 auto;
+    }
+
+    /* ===== CONTACT ===== */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .contact-left .dashes {
+      width: 100%;
+      height: 1px;
+      background: repeating-linear-gradient(
+        to right,
+        rgba(239, 239, 235, 0.1) 0px,
+        rgba(239, 239, 235, 0.1) 6px,
+        transparent 6px,
+        transparent 12px
+      );
+      margin: 1.5rem 0;
+    }
+    .contact-methods {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .contact-method {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(239, 239, 235, 0.04);
+      transition: all 0.3s ease;
+    }
+    .contact-method:hover {
+      padding-left: 0.5rem;
+      border-bottom-color: rgba(239, 239, 235, 0.1);
+    }
+    .contact-method .cm-icon { font-size: 1.2rem; opacity: 0.5; }
+    .contact-method .cm-label {
+      font-size: 0.85rem;
+    }
+    .contact-method .cm-label small {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--gray);
+      margin-top: 0.1rem;
+    }
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .contact-form input,
+    .contact-form textarea,
+    .contact-form select {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      background: transparent;
+      border: 1px solid rgba(239, 239, 235, 0.1);
+      border-radius: 8px;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+    .contact-form input:focus,
+    .contact-form textarea:focus,
+    .contact-form select:focus {
+      border-color: rgba(239, 239, 235, 0.3);
+    }
+    .contact-form textarea { min-height: 100px; resize: vertical; }
+    .contact-form select option { background: #1D1D1B; }
+    .contact-form .btn { align-self: flex-start; margin-top: 0.5rem; }
+
+    .contact-form .btn-send {
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      background: var(--white);
+      color: var(--black);
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.4s var(--ease);
+    }
+    .contact-form .btn-send:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(239, 239, 235, 0.1);
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      border-top: 1px solid rgba(239, 239, 235, 0.04);
+      padding: 3rem 2rem 2rem;
+      background: #1a1a18;
+    }
+    .footer-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .footer-logo {
+      font-weight: 500;
+      letter-spacing: 2px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+    }
+    .footer-links a {
+      font-size: 0.75rem;
+      color: var(--gray);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: color 0.3s ease;
+    }
+    .footer-links a:hover { color: var(--white); }
+    .footer-social {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .footer-social a {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid rgba(239, 239, 235, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    .footer-social a:hover {
+      border-color: var(--white);
+      background: rgba(239, 239, 235, 0.05);
+    }
+    .footer-social a svg {
+      width: 14px; height: 14px;
+      fill: var(--gray);
+      transition: fill 0.3s ease;
+    }
+    .footer-social a:hover svg { fill: var(--white); }
+    .footer-copy {
+      width: 100%;
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--gray);
+      margin-top: 1.5rem;
+      letter-spacing: 1px;
+    }
+    .footer-sound {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+      height: 20px;
+      margin-top: 1rem;
+      opacity: 0.3;
+    }
+    .footer-sound span {
+      width: 2px;
+      background: var(--white);
+      border-radius: 1px;
+      animation: soundMini 2s ease infinite;
+    }
+    .footer-sound span:nth-child(1) { height: 8px; animation-delay: 0.0s; }
+    .footer-sound span:nth-child(2) { height: 14px; animation-delay: 0.2s; }
+    .footer-sound span:nth-child(3) { height: 10px; animation-delay: 0.4s; }
+    .footer-sound span:nth-child(4) { height: 18px; animation-delay: 0.6s; }
+    .footer-sound span:nth-child(5) { height: 12px; animation-delay: 0.8s; }
+    .footer-sound span:nth-child(6) { height: 16px; animation-delay: 1.0s; }
+    .footer-sound span:nth-child(7) { height: 6px; animation-delay: 1.2s; }
+    .footer-sound span:nth-child(8) { height: 14px; animation-delay: 1.4s; }
+
+    @keyframes soundMini {
+      0%, 100% { transform: scaleY(0.5); opacity: 0.4; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+
+    /* ===== QUICKVIEW MODAL ===== */
+    .qv-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.4s var(--ease);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qv-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+    .qv-modal {
+      background: #1D1D1B;
+      border: 1px solid rgba(239, 239, 235, 0.08);
+      border-radius: 16px;
+      padding: 2.5rem;
+      max-width: 500px;
+      width: 90%;
+      transform: translateY(30px) scale(0.95);
+      transition: all 0.4s var(--ease);
+    }
+    .qv-overlay.open .qv-modal {
+      transform: translateY(0) scale(1);
+    }
+    .qv-modal h3 {
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .qv-modal .qv-cat {
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+    .qv-modal p {
+      font-size: 0.85rem;
+      color: rgba(239, 239, 235, 0.6);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+    .qv-modal .qv-close {
+      padding: 0.6rem 1.5rem;
+      border-radius: 50px;
+      border: 1px solid rgba(239, 239, 235, 0.15);
+      background: transparent;
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .qv-modal .qv-close:hover {
+      background: rgba(239, 239, 235, 0.05);
+    }
+
+    /* ===== REVEAL ===== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s var(--ease);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 991px) {
+      .three-col_list { grid-template-columns: repeat(2, 1fr); }
+      .three-col_list .three-col_item:nth-child(n+3) { display: none; }
+      .services-grid { grid-template-columns: repeat(2, 1fr); }
+      .yt-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .stat-item:nth-child(2) { border-right: none; }
+    }
+    @media (max-width: 768px) {
+      .nav_links {
+        position: fixed;
+        top: 0; right: -100%;
+        width: 70%;
+        height: 100vh;
+        background: rgba(29,29,27,0.98);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        justify-content: center;
+        gap: 2rem;
+        padding: 2rem;
+        transition: right 0.4s var(--ease);
+        border-left: 1px solid rgba(239,239,235,0.05);
+      }
+      .nav_links.open { right: 0; }
+      .nav_toggle { display: flex; }
+      .hero h1 { font-size: clamp(2.5rem, 10vw, 4rem); }
+      .three-col_list { grid-template-columns: 1fr; }
+      .three-col_list .three-col_item:nth-child(n+2) { display: none; }
+      .sound-text { grid-template-columns: 1fr; gap: 1.5rem; }
+      .services-grid { grid-template-columns: 1fr; }
+      .yt-grid { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .hero_stats { flex-wrap: wrap; gap: 1.5rem; }
+      .footer-inner { flex-direction: column; text-align: center; }
+    }
+    @media (max-width: 480px) {
+      .hero { padding: 6rem 1.25rem 3rem; }
+      .section { padding: 4rem 1.25rem; }
+      .three-col { padding: 3rem 1.25rem; }
+      .sound-section { padding: 4rem 1.25rem; }
+      .three-col_item { aspect-ratio: 16/9; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .stat-item { border-right: none; border-bottom: 1px solid rgba(239,239,235,0.04); }
+      .stat-item:last-child { border-bottom: none; }
+      .marquee-track span { font-size: 3rem; letter-spacing: -1px; }
+      .navbar_wrap { padding: 0.75rem 1.25rem; }
+      .navbar_wrap.scrolled { padding: 0.5rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== LOADING OVERLAY ===== -->
+  <div class="loader" id="loader">
+    <div class="load-lines">
+      <div class="line"></div><div class="line"></div><div class="line"></div>
+      <div class="line"></div><div class="line"></div><div class="line"></div>
+      <div class="line"></div><div class="line"></div><div class="line"></div>
+      <div class="line"></div>
+    </div>
+    <div class="loader-label">Cargando</div>
+  </div>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar_wrap" id="navbar">
+    <div class="navbar_inner">
+      <a href="#" class="nav_logo">
+        <span class="logo-dot"></span>
+        SOLO EL MUSIC
+      </a>
+      <div class="nav_links" id="navLinks">
+        <a href="#work">Trabajos</a>
+        <a href="#services">Servicios</a>
+        <a href="#about">Estudio</a>
+        <a href="#contact" class="nav_cta">Contacto</a>
+      </div>
+      <button class="nav_toggle" id="navToggle" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="hero">
+    <div class="hero_bg"></div>
+    <div class="hero_content">
+      <div class="hero_label">Productor Musical — Beatmaker</div>
+      <h1>
+        Sonido que<br/>
+        <span class="slant">define tu</span><br/>
+        música
+      </h1>
+      <p class="hero_desc">
+        Producción musical, beats personalizados, mezcla y mastering.
+        Transformo tus ideas en canciones con sonido profesional.
+      </p>
+      <div class="hero_actions">
+        <a href="#contact" class="btn btn-primary">
+          Iniciar Proyecto
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#work" class="btn btn-outline">Ver Trabajos</a>
+      </div>
+      <div class="hero_stats">
+        <div class="hero_stat">
+          <div class="number">25+</div>
+          <div class="label">Producciones</div>
+        </div>
+        <div class="hero_stat">
+          <div class="number">87K+</div>
+          <div class="label">Vistas en YouTube</div>
+        </div>
+        <div class="hero_stat">
+          <div class="number">10+</div>
+          <div class="label">Años de Experiencia</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== THREE-COLUMN WORK GRID ===== -->
+  <div class="three-col" id="work">
+    <div class="three-col_head reveal">
+      <div>
+        <div class="eyebrow">— Trabajos recientes</div>
+        <h2>Explora mi trabajo</h2>
+      </div>
+    </div>
+    <div class="three-col_list" id="workGrid">
+      <!-- JS generates cards -->
+    </div>
+  </div>
+
+  <!-- ===== SOUND LINE SECTION ===== -->
+  <div class="sound-section" id="about">
+    <div class="sound-inner">
+      <div class="sound-lines reveal">
+        <div class="sound-line"></div><div class="sound-line"></div><div class="sound-line"></div>
+        <div class="sound-line"></div><div class="sound-line"></div><div class="sound-line"></div>
+        <div class="sound-line"></div><div class="sound-line"></div><div class="sound-line"></div>
+        <div class="sound-line"></div><div class="sound-line"></div><div class="sound-line"></div>
+      </div>
+      <div class="sound-text">
+        <h2 class="reveal">
+          El arte de producir<br/>
+          <span class="slant">y hacer</span> música
+        </h2>
+        <div class="reveal reveal-delay-1">
+          <p>
+            Desde 2011 compartiendo tutoriales de producción musical en alta calidad.
+            Mi canal de YouTube está dedicado a enseñar técnicas de producción,
+            mezcla, mastering y sound design en español.
+          </p>
+          <p style="margin-top:1rem;">
+            Cada proyecto recibe atención personalizada para lograr un sonido
+            único y profesional. Trabajo con artistas, compositores y marcas
+            para crear música que conecte.
+          </p>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1.5rem;">
+            <span style="font-size:0.7rem;padding:0.3rem 1rem;border:1px solid rgba(239,239,235,0.1);border-radius:50px;letter-spacing:1px;text-transform:uppercase;">Producción</span>
+            <span style="font-size:0.7rem;padding:0.3rem 1rem;border:1px solid rgba(239,239,235,0.1);border-radius:50px;letter-spacing:1px;text-transform:uppercase;">Mezcla</span>
+            <span style="font-size:0.7rem;padding:0.3rem 1rem;border:1px solid rgba(239,239,235,0.1);border-radius:50px;letter-spacing:1px;text-transform:uppercase;">Mastering</span>
+            <span style="font-size:0.7rem;padding:0.3rem 1rem;border:1px solid rgba(239,239,235,0.1);border-radius:50px;letter-spacing:1px;text-transform:uppercase;">Beats</span>
+            <span style="font-size:0.7rem;padding:0.3rem 1rem;border:1px solid rgba(239,239,235,0.1);border-radius:50px;letter-spacing:1px;text-transform:uppercase;">Tutoriales</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SERVICES ===== -->
+  <section class="section" id="services">
+    <div class="reveal" style="max-width:1400px;margin:0 auto;">
+      <div class="label">— Servicios</div>
+      <h2 class="section-title">
+        Producción musical<br/>
+        <span class="slant">de principio a</span> fin
+      </h2>
+      <p class="section-sub">
+        Desde la idea inicial hasta el master final. Servicios profesionales
+        para llevar tu música al siguiente nivel.
+      </p>
+    </div>
+    <div class="services-grid" id="servicesGrid">
+      <!-- JS generates -->
+    </div>
+  </section>
+
+  <!-- ===== YOUTUBE ===== -->
+  <section class="section" style="background:#1a1a18;">
+    <div class="reveal" style="max-width:1400px;margin:0 auto;">
+      <div class="label">— YouTube</div>
+      <h2 class="section-title">
+        Contenido educativo<br/>
+        <span class="slant">en alta</span> definición
+      </h2>
+      <p class="section-sub">
+        Tutoriales, breakdowns y sesiones de producción. Aprende técnicas
+        profesionales explicadas paso a paso.
+      </p>
+    </div>
+    <div class="yt-grid" id="ytGrid">
+      <!-- JS generates -->
+    </div>
+    <div class="yt-cta reveal">
+      <a href="https://www.youtube.com/channel/UCJ5PtSmguS49eUv3JoZmSXA" target="_blank" rel="noopener" class="btn btn-outline">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        Ver Canal Completo
+      </a>
+    </div>
+  </section>
+
+  <!-- ===== MARQUEE ===== -->
+  <div class="marquee-section">
+    <div class="marquee-track" id="marqueeTrack">
+      <span>✦ SOLO EL MUSIC</span>
+      <span class="highlight">— BEATS —</span>
+      <span>✦ MEZCLA &amp; MASTERING</span>
+      <span class="highlight">— TUTORIALES —</span>
+      <span>✦ PRODUCCIÓN MUSICAL</span>
+      <span class="highlight">— SOUND DESIGN —</span>
+      <!-- Duplicate for seamless loop -->
+      <span>✦ SOLO EL MUSIC</span>
+      <span class="highlight">— BEATS —</span>
+      <span>✦ MEZCLA &amp; MASTERING</span>
+      <span class="highlight">— TUTORIALES —</span>
+      <span>✦ PRODUCCIÓN MUSICAL</span>
+      <span class="highlight">— SOUND DESIGN —</span>
+    </div>
+  </div>
+
+  <!-- ===== STATS ===== -->
+  <section class="section">
+    <div class="stats-grid">
+      <div class="stat-item reveal">
+        <div class="num">25+</div>
+        <div class="desc">Producciones realizadas con dedicación y calidad</div>
+      </div>
+      <div class="stat-item reveal reveal-delay-1">
+        <div class="num">87K+</div>
+        <div class="desc">Vistas en YouTube compartiendo conocimiento</div>
+      </div>
+      <div class="stat-item reveal reveal-delay-2">
+        <div class="num">10+</div>
+        <div class="desc">Años de experiencia en producción musical</div>
+      </div>
+      <div class="stat-item reveal reveal-delay-3">
+        <div class="num">100%</div>
+        <div class="desc">Compromiso con tu visión artística</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONTACT ===== -->
+  <section class="section" id="contact" style="background:#1a1a18;">
+    <div class="contact-grid">
+      <div class="contact-left reveal">
+        <div class="label">— Contacto</div>
+        <h2 class="section-title">
+          Trabajemos<br/>
+          <span class="slant">juntos</span>
+        </h2>
+        <p style="color:rgba(239,239,235,0.5);font-size:0.9rem;line-height:1.7;max-width:400px;">
+          ¿Tienes un proyecto en mente? Cuéntame tu idea y la hacemos realidad.
+          Respondo en máximo 24 horas.
+        </p>
+        <div class="dashes"></div>
+        <div class="contact-methods">
+          <div class="contact-method">
+            <span class="cm-icon">✉</span>
+            <div class="cm-label">
+              Email
+              <small>soloelmusic@proton.me</small>
+            </div>
+          </div>
+          <div class="contact-method">
+            <span class="cm-icon">▶</span>
+            <div class="cm-label">
+              YouTube
+              <small>/@Soloelmusic</small>
+            </div>
+          </div>
+          <div class="contact-method">
+            <span class="cm-icon">💬</span>
+            <div class="cm-label">
+              WhatsApp
+              <small>Disponible para proyectos</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      <form class="contact-form reveal reveal-delay-1" id="contactForm">
+        <input type="text" placeholder="Nombre" required />
+        <input type="email" placeholder="Email" required />
+        <select required>
+          <option value="">Selecciona un servicio</option>
+          <option>Producción Musical</option>
+          <option>Beat Personalizado</option>
+          <option>Mezcla Profesional</option>
+          <option>Mastering</option>
+          <option>Edición Vocal</option>
+          <option>Clase / Tutorial</option>
+          <option>Otro</option>
+        </select>
+        <textarea placeholder="Cuéntame sobre tu proyecto..." required></textarea>
+        <button type="submit" class="btn-send">
+          Enviar Mensaje
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-left:6px;"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-logo">✦ SOLO EL MUSIC</div>
+      <div class="footer-sound">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <div class="footer-links">
+        <a href="#work">Trabajos</a>
+        <a href="#services">Servicios</a>
+        <a href="#about">Estudio</a>
+        <a href="#contact">Contacto</a>
+      </div>
+      <div class="footer-social">
+        <a href="https://www.youtube.com/channel/UCJ5PtSmguS49eUv3JoZmSXA" target="_blank" rel="noopener" aria-label="YouTube">
+          <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </a>
+        <a href="#" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </a>
+        <a href="#" aria-label="TikTok">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+        </a>
+      </div>
+      <div class="footer-copy">
+        © 2026 Solo el Music. Todos los derechos reservados.
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== QUICKVIEW MODAL ===== -->
+  <div class="qv-overlay" id="qvOverlay">
+    <div class="qv-modal">
+      <div class="qv-cat" id="qvCat">Categoría</div>
+      <h3 id="qvTitle">Título del proyecto</h3>
+      <p id="qvDesc">Descripción del proyecto y detalles de la producción.</p>
+      <button class="qv-close" id="qvClose">Cerrar</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lenis@1.1.4/dist/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <script>
+    // =============================================
+    // 1. LOADING SCREEN
+    // =============================================
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loader').classList.add('hidden');
+      }, 800);
+    });
+
+    // =============================================
+    // 2. LENIS SMOOTH SCROLL
+    // =============================================
+    const lenis = new Lenis({
+      duration: 1.8,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => lenis.raf(time * 1000));
+    gsap.ticker.lagSmoothing(0);
+
+    // =============================================
+    // 3. NAVBAR
+    // =============================================
+    const navbar = document.getElementById('navbar');
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+
+    lenis.on('scroll', ({ scroll }) => {
+      navbar.classList.toggle('scrolled', scroll > 60);
+    });
+
+    navToggle.addEventListener('click', () => {
+      navToggle.classList.toggle('active');
+      navLinks.classList.toggle('open');
+    });
+    navLinks.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        navToggle.classList.remove('active');
+        navLinks.classList.remove('open');
+      });
+    });
+
+    // =============================================
+    // 4. SCROLL REVEAL (IntersectionObserver)
+    // =============================================
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    // =============================================
+    // 5. WORK GRID (Three-column items)
+    // =============================================
+    const workItems = [
+      { title: 'Beat de Trap Oscuro', cat: 'Beat Personalizado', gradient: 'linear-gradient(135deg, #2d1b69, #1a1a2e)' },
+      { title: 'Mezcla Pop / Reggaetón', cat: 'Mezcla Profesional', gradient: 'linear-gradient(135deg, #1a3a3a, #0d2137)' },
+      { title: 'Tutorial: FL Studio desde Cero', cat: 'Tutorial', gradient: 'linear-gradient(135deg, #3a1a1a, #2e1b1b)' },
+      { title: 'Mastering para Streaming', cat: 'Mastering', gradient: 'linear-gradient(135deg, #1a2e1a, #1b3a2e)' },
+      { title: 'Producción para Artista', cat: 'Producción Musical', gradient: 'linear-gradient(135deg, #2e1b3a, #1a1a3a)' },
+      { title: 'Sound Design para Videojuegos', cat: 'Sound Design', gradient: 'linear-gradient(135deg, #1b3a3a, #2e2e1b)' },
+    ];
+
+    const workGrid = document.getElementById('workGrid');
+    workItems.forEach((item, i) => {
+      const col = document.createElement('div');
+      col.className = 'three-col-item mask';
+      col.innerHTML = `
+        <div class="thumb-bg" style="background:${item.gradient};"></div>
+        <div class="play-badge">
+          <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+        </div>
+        <div class="overlay">
+          <div class="cat">${item.cat}</div>
+          <h3>${item.title}</h3>
+        </div>
+      `;
+      col.addEventListener('click', () => openQuickView(item.title, item.cat, 'Producción profesional con atención al detalle. Cada proyecto es único y recibe el cuidado necesario para alcanzar el mejor resultado sonoro.'));
+      workGrid.appendChild(col);
+      // Stagger reveal
+      setTimeout(() => { col.classList.add('reveal'); revealObserver.observe(col); }, i * 100);
+    });
+
+    // =============================================
+    // 6. SERVICES GRID
+    // =============================================
+    const services = [
+      { icon: '🎵', title: 'Producción Musical', desc: 'Creación de tracks completos desde cero. Arreglos, instrumentación y producción ejecutiva.', price: 'Desde $150 USD' },
+      { icon: '🥁', title: 'Beats Personalizados', desc: 'Beats originales en cualquier género: trap, reggaeton, pop, house, hip-hop, afrobeat.', price: 'Desde $80 USD' },
+      { icon: '🎚', title: 'Mezcla Profesional', desc: 'Mezcla multitrack con estándares industriales para un sonido limpio y potente.', price: 'Desde $100 USD' },
+      { icon: '🔊', title: 'Mastering', desc: 'Mastering profesional para que tu música suene bien en todos los sistemas.', price: 'Desde $60 USD' },
+      { icon: '🎤', title: 'Edición Vocal', desc: 'Grabación, edición, tuning y procesamiento vocal con sonido profesional.', price: 'Desde $50 USD' },
+      { icon: '📹', title: 'Tutoriales & Clases', desc: 'Clases personalizadas de producción musical. Aprende a tu ritmo.', price: 'Desde $40 USD/sesión' },
+    ];
+
+    const servicesGrid = document.getElementById('servicesGrid');
+    services.forEach((s, i) => {
+      const div = document.createElement('div');
+      div.className = 'service-item';
+      div.innerHTML = `
+        <span class="icon">${s.icon}</span>
+        <h3>${s.title}</h3>
+        <p>${s.desc}</p>
+        <span class="price">${s.price}</span>
+        <div class="dashes"></div>
+        ${i % 3 !== 2 ? '<div class="dashes-v"></div>' : ''}
+      `;
+      servicesGrid.appendChild(div);
+      setTimeout(() => { div.classList.add('reveal'); revealObserver.observe(div); }, i * 100);
+    });
+
+    // =============================================
+    // 7. YOUTUBE GRID
+    // =============================================
+    const ytVideos = [
+      { title: 'Cómo hacer un Beat desde Cero — FL Studio', views: '12K vistas', date: 'hace 2 meses', gradient: 'linear-gradient(135deg, #2d1b69, #1a1a2e)' },
+      { title: 'Mezcla Profesional Paso a Paso', views: '8.5K vistas', date: 'hace 3 meses', gradient: 'linear-gradient(135deg, #1a3a3a, #0d2137)' },
+      { title: 'Masteriza tus Beats como un Pro', views: '6.2K vistas', date: 'hace 1 mes', gradient: 'linear-gradient(135deg, #3a1a1a, #2e1b1b)' },
+      { title: 'Sound Design desde Cero', views: '5.1K vistas', date: 'hace 2 semanas', gradient: 'linear-gradient(135deg, #1a2e1a, #1b3a2e)' },
+      { title: 'Beat de Trap Oscuro — Producción Completa', views: '4.8K vistas', date: 'hace 1 semana', gradient: 'linear-gradient(135deg, #2e1b3a, #1a1a3a)' },
+      { title: 'Consejos de Mezcla para Principiantes', views: '3.9K vistas', date: 'hace 5 días', gradient: 'linear-gradient(135deg, #1b3a3a, #2e2e1b)' },
+    ];
+
+    const ytGrid = document.getElementById('ytGrid');
+    ytVideos.forEach((v, i) => {
+      const card = document.createElement('div');
+      card.className = 'yt-card mask';
+      card.innerHTML = `
+        <div class="thumb">
+          <div class="grad-bg" style="background:${v.gradient};"></div>
+          <div class="play-circle">
+            <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+          </div>
+        </div>
+        <div class="info">
+          <h4>${v.title}</h4>
+          <div class="meta">${v.views} · ${v.date}</div>
+        </div>
+      `;
+      card.addEventListener('click', () => {
+        window.open('https://www.youtube.com/channel/UCJ5PtSmguS49eUv3JoZmSXA', '_blank');
+      });
+      ytGrid.appendChild(card);
+      setTimeout(() => { card.classList.add('reveal'); revealObserver.observe(card); }, i * 100);
+    });
+
+    // =============================================
+    // 8. QUICKVIEW MODAL
+    // =============================================
+    const qvOverlay = document.getElementById('qvOverlay');
+    const qvTitle = document.getElementById('qvTitle');
+    const qvCat = document.getElementById('qvCat');
+    const qvDesc = document.getElementById('qvDesc');
+    const qvClose = document.getElementById('qvClose');
+
+    function openQuickView(title, cat, desc) {
+      qvTitle.textContent = title;
+      qvCat.textContent = cat;
+      qvDesc.textContent = desc;
+      qvOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    qvClose.addEventListener('click', () => {
+      qvOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+    qvOverlay.addEventListener('click', (e) => {
+      if (e.target === qvOverlay) {
+        qvOverlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+
+    // =============================================
+    // 9. CONTACT FORM
+    // =============================================
+    const form = document.getElementById('contactForm');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('.btn-send');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '✓ Mensaje Enviado';
+      btn.style.background = 'rgba(239,239,235,0.9)';
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.style.background = '';
+        form.reset();
+      }, 3000);
+    });
+
+    // =============================================
+    // 10. GSAP SCROLL TRIGGER ANIMATIONS
+    // =============================================
+    // Sound lines parallax
+    gsap.fromTo('.sound-line', {
+      scaleY: 0.3,
+      opacity: 0.02,
+    }, {
+      scaleY: 1,
+      opacity: 0.12,
+      duration: 2,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: '.sound-section',
+        start: 'top 80%',
+        end: 'top 30%',
+        scrub: 1.5,
+      },
+    });
+
+    // Marquee speed enhancement
+    const marquee = document.querySelector('.marquee-track');
+    let marqueeSpeed = 30;
+    marquee.addEventListener('mouseenter', () => { marquee.style.animationDuration = '60s'; });
+    marquee.addEventListener('mouseleave', () => { marquee.style.animationDuration = '30s'; });
+
+    // Stats counter animation
+    gsap.from('.stat-item .num', {
+      scrollTrigger: {
+        trigger: '.stats-grid',
+        start: 'top 80%',
+      },
+      textContent: 0,
+      duration: 1.5,
+      ease: 'power2.out',
+      snap: { textContent: 1 },
+      stagger: 0.15,
+    });
+
+    // Hero fade-in
+    gsap.from('.hero_content > *', {
+      y: 40,
+      opacity: 0,
+      duration: 1.2,
+      stagger: 0.15,
+      ease: 'power3.out',
+      delay: 1.0,
+    });
+
+    console.log('✦ Solo el Music — Sitio cargado con diseño Sonar inspirado');
+  </script>
+</body>
+</html>
