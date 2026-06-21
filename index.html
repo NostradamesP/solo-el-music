@@ -51,7 +51,7 @@
       width: 100vw; height: 100vh;
       z-index: 0;
       pointer-events: none;
-      opacity: 0.75;
+      opacity: 0.85;
       will-change: transform;
     }
 
@@ -1692,7 +1692,6 @@
       let W, H;
       const clusters = [];
 
-      // Palette: 6 vibrant colors + 6 muted variants
       const colors = [
         [0, 200, 255], [155, 135, 245], [255, 100, 150],
         [100, 220, 255], [200, 150, 255], [255, 180, 100],
@@ -1710,11 +1709,12 @@
 
       function generateClusters() {
         clusters.length = 0;
-        const count = Math.min(22, Math.floor((W * H) / 55000));
+        // More clusters for better coverage
+        const count = Math.min(28, Math.floor((W * H) / 42000));
         for (let i = 0; i < count; i++) {
           const palette = i % 3 === 0 ? muted : colors;
           const color = palette[Math.floor(Math.random() * palette.length)];
-          const barCount = 8 + Math.floor(Math.random() * 7); // 8–14 bars
+          const barCount = 8 + Math.floor(Math.random() * 7);
           const bars = [];
           for (let b = 0; b < barCount; b++) {
             const ratio = b / barCount;
@@ -1727,15 +1727,18 @@
               subPhase: Math.random() * Math.PI * 2,
             });
           }
+          // Random rotation: 0 (vertical), PI/2 (horizontal), or any angle
+          const angles = [0, 0, 0, Math.PI / 2, Math.PI / 2, Math.PI / 3, Math.PI / 4, -Math.PI / 3, -Math.PI / 4];
           clusters.push({
             x: Math.random(),
             y: Math.random(),
-            barW: 2.5 + Math.random() * 2.5,
-            gap: 1 + Math.random() * 2,
-            maxH: 18 + Math.random() * 32,
+            barW: 2.5 + Math.random() * 3,
+            gap: 1.5 + Math.random() * 2,
+            maxH: 20 + Math.random() * 35,
             color,
             bars,
-            alpha: 0.06 + Math.random() * 0.09,
+            alpha: 0.12 + Math.random() * 0.14,
+            rotation: angles[Math.floor(Math.random() * angles.length)],
           });
         }
       }
@@ -1747,24 +1750,26 @@
           const cl = clusters[ci];
           const cx = cl.x * W;
           const cy = cl.y * H;
-          const totalW = cl.bars.length * (cl.barW + cl.gap) - cl.gap;
-          const startX = cx - totalW / 2;
+          const totalW = cl.bars.length * (cl.barW + cl.gap);
           const [r, g, b] = cl.color;
 
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(cl.rotation);
+
+          // Draw bars relative to origin (0,0)
           for (let bi = 0; bi < cl.bars.length; bi++) {
             const bar = cl.bars[bi];
             const ratio = bi / cl.bars.length;
 
-            // Main oscillation + secondary jitter for organic "playing" feel
             const main = Math.sin(t * bar.speed + bar.phase) * 0.5 + 0.5;
             const jitter = Math.sin(t * bar.subSpeed + bar.subPhase + bi * 0.7) * 0.5 + 0.5;
             const val = Math.max(0.05, Math.min(1, main * bar.ampBase + jitter * bar.ampJitter));
             const height = val * cl.maxH;
 
-            const x = startX + bi * (cl.barW + cl.gap);
-            const yTop = cy - height;
+            const x = -totalW / 2 + bi * (cl.barW + cl.gap);
+            const yTop = -height;
 
-            // Brighter top, darker bottom = gradient effect
             const bright = 0.4 + val * 0.6;
             const alpha = cl.alpha * (0.3 + val * 0.7);
             const tr = Math.min(255, r * bright);
@@ -1781,13 +1786,15 @@
             ctx.fill();
           }
 
-          // Baseline underneath the cluster
+          // Baseline
           ctx.strokeStyle = `rgba(${r},${g},${b},${cl.alpha * 0.3})`;
           ctx.lineWidth = 0.5;
           ctx.beginPath();
-          ctx.moveTo(startX, cy);
-          ctx.lineTo(startX + totalW, cy);
+          ctx.moveTo(-totalW / 2, 0);
+          ctx.lineTo(-totalW / 2 + totalW - cl.gap, 0);
           ctx.stroke();
+
+          ctx.restore();
         }
 
         requestAnimationFrame(draw);
