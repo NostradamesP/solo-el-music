@@ -1418,12 +1418,12 @@
     // 5. WORK GRID (Three-column items)
     // =============================================
     const workItems = [
-      { title: 'Beat de Trap Oscuro', cat: 'Beat Personalizado', gradient: 'linear-gradient(135deg, #2d1b69, #1a1a2e)' },
-      { title: 'Mezcla Pop / Reggaetón', cat: 'Mezcla Profesional', gradient: 'linear-gradient(135deg, #1a3a3a, #0d2137)' },
-      { title: 'Beat de Hip-Hop Instrumental', cat: 'Beat', gradient: 'linear-gradient(135deg, #3a1a1a, #2e1b1b)' },
-      { title: 'Mastering para Streaming', cat: 'Mastering', gradient: 'linear-gradient(135deg, #1a2e1a, #1b3a2e)' },
-      { title: 'Producción para Artista', cat: 'Producción Musical', gradient: 'linear-gradient(135deg, #2e1b3a, #1a1a3a)' },
-      { title: 'Sound Design para Videojuegos', cat: 'Sound Design', gradient: 'linear-gradient(135deg, #1b3a3a, #2e2e1b)' },
+      { title: 'De corazon', cat: 'Sencillo', videoId: 'bTNFRDMgwHg' },
+      { title: 'Ponte perra', cat: 'Sencillo', videoId: 'wqljaYQn5Fo' },
+      { title: 'Dindon', cat: 'Sencillo', videoId: 'fJAx9RYGDtc' },
+      { title: 'Placata', cat: 'Sencillo', videoId: 'KXifG876EPc' },
+      { title: 'Ella ta to', cat: 'Sencillo', videoId: 'yKRplVlmGos' },
+      { title: 'Un tro de mmg', cat: 'Sencillo', videoId: 'CK0l-SgKW_Q' },
     ];
 
     const workGrid = document.getElementById('workGrid');
@@ -1431,7 +1431,13 @@
       const col = document.createElement('div');
       col.className = 'three-col-item mask';
       col.innerHTML = `
-        <div class="thumb-bg" style="background:${item.gradient};"></div>
+        <div class="thumb-bg" style="background:linear-gradient(135deg, #1a1a3a, #2d1b69);">
+          <iframe
+            src="https://www.youtube.com/embed/${item.videoId}?controls=0&rel=0&showinfo=0&autoplay=0&mute=1&loop=1&playlist=${item.videoId}"
+            style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;pointer-events:none;"
+            loading="lazy"
+          ></iframe>
+        </div>
         <div class="play-badge">
           <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
         </div>
@@ -1440,7 +1446,9 @@
           <h3>${item.title}</h3>
         </div>
       `;
-      col.addEventListener('click', () => openQuickView(item.title, item.cat, 'Producción profesional con atención al detalle. Cada proyecto es único y recibe el cuidado necesario para alcanzar el mejor resultado sonoro.'));
+      col.addEventListener('click', () => {
+        window.open(`https://www.youtube.com/watch?v=${item.videoId}`, '_blank');
+      });
       workGrid.appendChild(col);
       // Stagger reveal
       setTimeout(() => { col.classList.add('reveal'); revealObserver.observe(col); }, i * 100);
@@ -1478,54 +1486,32 @@
     // 7. PRODUCCIONES GRID
     // =============================================
     const producciones = [
-      { title: 'ComingSoon #Hablale de sexo', views: '3 vistas', date: 'abr 2026', gradient: 'linear-gradient(135deg, #1a1a3a, #2d1b69)', videoId: '4SrF577AWaY', isReal: true },
-      { title: 'Beat de Trap Oscuro — Completo', views: '—', date: '2026', gradient: 'linear-gradient(135deg, #2e1b3a, #1a1a3a)', videoId: null },
-      { title: 'Beat Melódico para Artista', views: '—', date: '2026', gradient: 'linear-gradient(135deg, #1a3a3a, #0d2137)', videoId: null },
-      { title: 'Producción Urbana Latina', views: '—', date: '2025', gradient: 'linear-gradient(135deg, #3a1a1a, #2e1b1b)', videoId: null },
-      { title: 'Beat de Reggaetón Romántico', views: '—', date: '2025', gradient: 'linear-gradient(135deg, #1a2e1a, #1b3a2e)', videoId: null },
-      { title: 'Canción Original — Próximamente', views: '—', date: '2026', gradient: 'linear-gradient(135deg, #1b3a3a, #2e2e1b)', videoId: null },
+      { title: 'De corazon (feat. El De la P)', videoId: 'bTNFRDMgwHg' },
+      { title: 'Ponte perra (feat. R5 El de la cuerda)', videoId: 'wqljaYQn5Fo' },
+      { title: 'Dindon (feat. theperlablack)', videoId: 'fJAx9RYGDtc' },
+      { title: 'Placata (feat. R5 El de la cuerda & Truchi Z)', videoId: 'KXifG876EPc' },
+      { title: 'Ella ta to (feat. R5 El de la cuerda & Nauta 402)', videoId: 'yKRplVlmGos' },
+      { title: 'Un tro de mmg (feat. R5 El de la cuerda & Nauta 402)', videoId: 'CK0l-SgKW_Q' },
     ];
 
     const ytGrid = document.getElementById('ytGrid');
     producciones.forEach((v, i) => {
       const card = document.createElement('div');
       card.className = 'yt-card mask';
-
-      if (v.isReal && v.videoId) {
-        // Embed real YouTube video
-        card.innerHTML = `
-          <div class="thumb" style="position:relative;overflow:hidden;background:#000;">
-            <iframe
-              src="https://www.youtube.com/embed/${v.videoId}?controls=1&rel=0"
-              style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-              loading="lazy"
-            ></iframe>
-          </div>
-          <div class="info">
-            <h4>${v.title}</h4>
-            <div class="meta">${v.views} · ${v.date}</div>
-          </div>
-        `;
-      } else {
-        card.innerHTML = `
-          <div class="thumb">
-            <div class="grad-bg" style="background:${v.gradient};"></div>
-            <div class="play-circle">
-              <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
-            </div>
-          </div>
-          <div class="info">
-            <h4>${v.title}</h4>
-            <div class="meta">${v.views} · ${v.date}</div>
-          </div>
-        `;
-        card.addEventListener('click', () => {
-          window.open('https://www.youtube.com/channel/UCJ5PtSmguS49eUv3JoZmSXA', '_blank');
-        });
-      }
-
+      card.innerHTML = `
+        <div class="thumb" style="position:relative;overflow:hidden;background:#000;">
+          <iframe
+            src="https://www.youtube.com/embed/${v.videoId}?controls=1&rel=0"
+            style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+        </div>
+        <div class="info">
+          <h4>${v.title}</h4>
+        </div>
+      `;
       ytGrid.appendChild(card);
       setTimeout(() => { card.classList.add('reveal'); revealObserver.observe(card); }, i * 100);
     });
